@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Estudio Socioeconómico - SMDIF Mineral de la Reforma</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fuentes e íconos -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Leaflet (mapa) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <style>
+    :root{
+      --vino:#7a0c2f;
+      --vino-oscuro:#4e0a1f;
+      --dorado:#cf9f49;
+      --fondo:#f7f3f5;
+      --borde:#e1ccd5;
+      --texto:#1b1b1b;
+    }
+
+    *{box-sizing:border-box;}
+
+    body{
+      margin:0;
+      font-family:"Montserrat",sans-serif;
+      background:var(--fondo);
+      color:var(--texto);
+    }
+
+    /* HEADER */
+    header{
+      position:sticky;
+      top:0;
+      z-index:20;
+      background:var(--vino);
+      color:#fff;
+      padding:10px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      box-shadow:0 4px 12px rgba(0,0,0,.25);
+    }
+    .logo-area{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .logo{
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      background:var(--dorado);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--vino-oscuro);
+      font-size:20px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.3px;
+    }
+    .brand small{
+      display:block;
+      font-size:11px;
+      opacity:.9;
+    }
+    nav a{
+      color:#fff;
+      text-decoration:none;
+      margin-left:10px;
+      padding:4px 10px;
+      border-radius:999px;
+      font-size:13px;
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      opacity:.9;
+    }
+    nav a.activo,
+    nav a:hover{
+      background:rgba(255,255,255,.18);
+      opacity:1;
+    }
+
+    /* LAYOUT PRINCIPAL */
+    main.layout{
+      max-width:1200px;
+      margin:18px auto 24px;
+      padding:0 16px;
+      display:grid;
+      grid-template-columns:minmax(0,2.1fr) minmax(320px,1.2fr);
+      gap:18px;
+      align-items:flex-start;
+    }
+    .card{
+      background:#fff;
+      border-radius:18px;
+      padding:18px 18px 20px;
+      border:1px solid var(--borde);
+      box-shadow:0 6px 18px rgba(0,0,0,.04);
+    }
+    .card h2,
+    .card h3{
+      margin-top:0;
+      margin-bottom:10px;
+      font-size:18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .card h2 span,
+    .card h3 span{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .tag{
+      font-size:11px;
+      padding:2px 8px;
+      border-radius:999px;
+      background:rgba(122,12,47,.08);
+      color:var(--vino-oscuro);
+      border:1px solid rgba(122,12,47,.35);
+    }
+    .desc{
+      font-size:13px;
+      margin-top:0;
+      margin-bottom:12px;
+      color:#555;
+    }
+
+    /* PROGRESO + PILLS */
+    .progress{
+      width:100%;
+      height:7px;
+      border-radius:999px;
+      background:#f2e5eb;
+      margin-bottom:14px;
+      overflow:hidden;
+    }
+    .progress>span{
+      display:block;
+      height:100%;
+      width:0;
+      background:linear-gradient(90deg,var(--vino),var(--dorado));
+      transition:width .25s ease;
+    }
+    .pills{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-bottom:18px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 12px;
+      border-radius:999px;
+      border:1px dashed var(--borde);
+      font-size:12px;
+      background:#fff;
+      cursor:pointer;
+    }
+    .pill.activa{
+      background:var(--vino);
+      border-color:var(--vino);
+      color:#fff;
+    }
+
+    /* FORMULARIO */
+    form{
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+    }
+    .step{display:none;}
+    .step.activo{display:block;}
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin-bottom:10px;
+    }
+    label{
+      font-weight:600;
+      font-size:13px;
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      color:#333;
+    }
+    label i{color:var(--vino);}
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    input[type="tel"],
+    select,
+    textarea{
+      border-radius:10px;
+      border:1px solid var(--borde);
+      padding:7px 9px;
+      font-family:inherit;
+      font-size:13px;
+      outline:none;
+      transition:border .15s,box-shadow .15s;
+      background:#fff;
+    }
+    input:focus,
+    select:focus,
+    textarea:focus{
+      border-color:var(--vino);
+      box-shadow:0 0 0 1px rgba(122,12,47,.2);
+    }
+    textarea{
+      min-height:64px;
+      resize:vertical;
+    }
+
+    .grid-2,
+    .grid-3{
+      display:grid;
+      gap:12px;
+      margin-bottom:10px;
+    }
+    .grid-2{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .grid-3{grid-template-columns:repeat(3,minmax(0,1fr));}
+
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .chip{
+      font-size:12px;
+      border-radius:999px;
+      border:1px solid var(--borde);
+      padding:4px 10px;
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      background:#fff;
+      cursor:pointer;
+    }
+    .chip input{accent-color:var(--vino);}
+
+    .acciones{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      gap:8px;
+      margin-top:4px;
+    }
+    .btn{
+      border-radius:999px;
+      border:1px solid var(--borde);
+      padding:7px 13px;
+      font-size:13px;
+      background:#fff;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    .btn.primary{
+      background:var(--vino);
+      border-color:var(--vino);
+      color:#fff;
+    }
+    .btn.gold{
+      background:var(--dorado);
+      border-color:var(--dorado);
+      color:#3e2a13;
+      font-weight:600;
+    }
+
+    /* TABLAS */
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:12px;
+    }
+    th,td{
+      border:1px solid #ead7df;
+      padding:6px 6px;
+      vertical-align:middle;
+    }
+    th{
+      background:#f5edf1;
+      font-weight:600;
+    }
+    td input,
+    td select{
+      width:100%;
+      font-size:12px;
+    }
+
+    /* SIDEBAR */
+    .sidebar .card{
+      margin-bottom:14px;
+    }
+    #chartIE{
+      width:100%;
+      max-height:230px;
+    }
+    #map{
+      width:100%;
+      height:260px;
+      border-radius:14px;
+      border:1px solid var(--borde);
+      overflow:hidden;
+    }
+    ul.resumen{
+      list-style:none;
+      padding:0;
+      margin:0;
+      font-size:13px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    ul.resumen li{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      border-bottom:1px dashed #ead7df;
+      padding-bottom:4px;
+    }
+    ul.resumen span{color:#555;}
+    ul.resumen strong{font-weight:700;}
+
+    @media (max-width:900px){
+      main.layout{
+        grid-template-columns:1fr;
+      }
+      nav{
+        display:none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo-area">
+      <div class="logo"><i class="fa-solid fa-hands-holding-child"></i></div>
+      <div class="brand">
+        <h1><i class="fa-solid fa-file-pen"></i> Estudio Socioeconómico</h1>
+        <small>SMDIF Mineral de la Reforma · Plataforma de captura</small>
+      </div>
+    </div>
+    <nav>
+      <a href="#form" class="activo"><i class="fa-solid fa-list-check"></i> Encuesta</a>
+      <a href="#graficos"><i class="fa-solid fa-chart-column"></i> Gráficos</a>
+      <a href="#mapas"><i class="fa-solid fa-location-dot"></i> Mapa</a>
+      <a href="#resultados"><i class="fa-solid fa-gauge-high"></i> Resultados</a>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <!-- FORMULARIO -->
+    <section class="card" id="form">
+      <h2>
+        <span><i class="fa-solid fa-users-viewfinder"></i> Captura del Estudio</span>
+        <span class="tag">Demo interno</span>
+      </h2>
+      <p class="desc">
+        Completa cada módulo igual que en el formato físico. Al finalizar podrás imprimir el formato o descargar un archivo JSON con la información capturada.
+      </p>
+
+      <div class="progress"><span id="bar"></span></div>
+
+      <!-- PILLS DE SECCIONES -->
+      <div class="pills" id="pills">
+        <span class="pill activa"><i class="fa-solid fa-user-check"></i>1. Estado del beneficiario</span>
+        <span class="pill"><i class="fa-solid fa-user-plus"></i>2. Datos del solicitante</span>
+        <span class="pill"><i class="fa-solid fa-coins"></i>3. Ingresos y servicios</span>
+        <span class="pill"><i class="fa-solid fa-house-chimney"></i>4. Vivienda</span>
+        <span class="pill"><i class="fa-solid fa-wallet"></i>5. Egresos mensuales</span>
+        <span class="pill"><i class="fa-solid fa-bowl-food"></i>6. Alimentación</span>
+        <span class="pill"><i class="fa-solid fa-file-signature"></i>7. Opinión y firmas</span>
+      </div>
+
+      <form id="encuesta">
+        <!-- 1. ESTADO DEL BENEFICIARIO -->
+        <div class="step activo" data-step="1">
+          <h3><span><i class="fa-solid fa-user-check"></i> Estado del beneficiario</span></h3>
+
+          <!-- Datos de expediente -->
+          <div class="grid-3">
+            <div class="field">
+              <label><i class="fa-solid fa-calendar-day"></i>Fecha de elaboración</label>
+              <input type="date" name="fecha_elaboracion" />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-flag"></i>Estado del beneficiario / expediente</label>
+              <select name="estado_beneficiario">
+                <option value="">Seleccione</option>
+                <option>Vigente</option>
+                <option>Nuevo</option>
+                <option>En evaluación</option>
+                <option>Concluido</option>
+                <option>Baja</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-tag"></i>Clasificación</label>
+              <input type="text" name="clasificacion" placeholder="Alta / Media / Baja u otro" />
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div class="field">
+              <label><i class="fa-solid fa-city"></i>Municipio</label>
+              <input type="text" name="municipio" value="Mineral de la Reforma" />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-map"></i>Estado</label>
+              <input type="text" name="estado" value="Hidalgo" />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-hashtag"></i>Folio</label>
+              <input type="text" name="folio" />
+            </div>
+          </div>
+
+          <div class="chips" style="margin-top:6px">
+            <label class="chip"><input type="checkbox" name="atencion_inmediata" /> Atención inmediata</label>
+            <label class="chip"><input type="checkbox" name="discapacidad" /> Discapacidad</label>
+          </div>
+
+          <hr style="margin:20px 0;border:none;border-top:1px solid var(--borde);">
+
+          <!-- Datos de la persona beneficiaria -->
+          <div class="grid-3">
+            <div class="field">
+              <label><i class="fa-solid fa-user"></i>Nombre del beneficiario</label>
+              <input type="text" name="nombre_beneficiario" required />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-venus-mars"></i>Género</label>
+              <select name="genero_beneficiario">
+                <option value="">Seleccione</option>
+                <option>Femenino</option>
+                <option>Masculino</option>
+                <option>No especifica</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-cake-candles"></i>Fecha de nacimiento</label>
+              <input type="date" name="fecha_nacimiento" id="fnac" />
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div class="field">
+              <label><i class="fa-solid fa-hourglass-half"></i>Edad</label>
+              <input type="number" id="edad" name="edad" min="0" placeholder="Se calcula automáticamente" />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-ring"></i>Estado civil</label>
+              <select name="estado_civil">
+                <option value="">Seleccione</option>
+                <option>Soltero(a)</option>
+                <option>Casado(a)</option>
+                <option>Unión libre</option>
+                <option>Divorciado(a)</option>
+                <option>Viudo(a)</option>
+                <option>Separado(a)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-school"></i>Nivel de estudios</label>
+              <select name="nivel_estudios">
+                <option value="">Seleccione</option>
+                <option>Sin estudios</option>
+                <option>Primaria</option>
+                <option>Secundaria</option>
+                <option>Bachillerato</option>
+                <option>Técnico</option>
+                <option>Licenciatura</option>
+                <option>Posgrado</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label><i class="fa-solid fa-briefcase"></i>Ocupación actual</label>
+              <input type="text" name="ocupacion_actual" />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-phone"></i>Teléfono</label>
+              <input type="tel" name="telefono_beneficiario" />
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label><i class="fa-solid fa-road"></i>Domicilio (calle y número)</label>
+              <input type="text" name="domicilio" />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-location-dot"></i>Colonia / Localidad</label>
+              <input type="text" name="colonia" />
+            </div>
+          </div>
+
+          <button class="btn primary" type="button" id="btnLocate1" style="margin-top:6px">
+            <i class="fa-solid fa-location-crosshairs"></i> Ubicar domicilio en el mapa
+          </button>
+
+          <div class="field" style="margin-top:16px;">
+            <label><i class="fa-solid fa-notes-medical"></i>Problemática y padecimiento actual</label>
+            <textarea name="problematica"></textarea>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label><i class="fa-solid fa-hand-holding-heart"></i>Apoyo que solicita</label>
+              <textarea name="apoyo_solicita" placeholder="Describa el tipo de apoyo solicitado"></textarea>
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-clipboard-check"></i>Estado del beneficiario (entrevista)</label>
+              <div class="chips">
+                <label class="chip">
+                  <input type="radio" name="estado_beneficiario_entrevista" value="Primera vez" /> Primera vez
+                </label>
+                <label class="chip">
+                  <input type="radio" name="estado_beneficiario_entrevista" value="Subsecuente" /> Subsecuente
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Salud del beneficiario -->
+          <div class="grid-2">
+            <div class="field">
+              <label><i class="fa-solid fa-user-nurse"></i>¿Recibe atención médica?</label>
+              <select name="recibe_atencion_medica">
+                <option value="">Seleccione</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-shield"></i>¿Cuenta con seguridad social?</label>
+              <select name="tiene_seguridad_social">
+                <option value="">Seleccione</option>
+                <option>Sí</option>
+                <option>No</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label><i class="fa-solid fa-house-medical"></i>Institución médica habitual</label>
+              <select name="institucion_medica">
+                <option value="">Seleccione</option>
+                <option>Centro de Salud</option>
+                <option>Hospital General</option>
+                <option>IMSS</option>
+                <option>ISSSTE</option>
+                <option>Privado</option>
+                <option>Otra</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-shield-heart"></i>Institución de seguridad social</label>
+              <select name="seguridad_social">
+                <option value="">Seleccione</option>
+                <option>IMSS</option>
+                <option>ISSSTE</option>
+                <option>INSABI / Seguro Popular</option>
+                <option>ISSTEH</option>
+                <option>No cuenta</option>
+                <option>Otra</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label><i class="fa-solid fa-house-medical-flag"></i>Centro de salud</label>
+              <input type="text" name="centro_salud" />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-id-card-medical"></i>Seguro Popular / INSABI</label>
+              <input type="text" name="seguro_popular" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. DATOS DEL SOLICITANTE + ESTRUCTURA FAMILIAR -->
+        <div class="step" data-step="2">
+          <h3><span><i class="fa-solid fa-user-plus"></i> Datos del solicitante</span></h3>
+          <p class="desc">
+            Captura los datos de la persona que realiza la solicitud y registra la estructura familiar del hogar.
+          </p>
+
+          <!-- Datos del solicitante -->
+          <div class="grid-3">
+            <div class="field">
+              <label><i class="fa-solid fa-user-plus"></i>Nombre del solicitante</label>
+              <input type="text" name="nombre_solicitante" />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-venus-mars"></i>Género</label>
+              <select name="genero_solicitante">
+                <option value="">Seleccione</option>
+                <option>Femenino</option>
+                <option>Masculino</option>
+                <option>No especifica</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-hourglass-half"></i>Edad</label>
+              <input type="number" name="edad_solicitante" min="0" />
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div class="field">
+              <label><i class="fa-solid fa-phone"></i>Número de teléfono</label>
+              <input type="tel" name="tel_solicitante" />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-people-arrows"></i>Parentesco con el beneficiario</label>
+              <input type="text" name="parentesco" />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-briefcase"></i>Ocupación</label>
+              <input type="text" name="ocupacion_solicitante" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label><i class="fa-solid fa-house-user"></i>Domicilio del solicitante</label>
+            <input type="text" name="dom_solicitante" />
+          </div>
+
+          <!-- Estructura familiar -->
+          <div class="field" style="margin-top:16px;">
+            <label><i class="fa-solid fa-people-group"></i>Estructura familiar</label>
+            <table id="tablaFamilia">
+              <thead>
+                <tr>
+                  <th>Apellido paterno/materno y nombre(s)</th>
+                  <th>Edad</th>
+                  <th>Parentesco</th>
+                  <th>Escolaridad</th>
+                  <th>Ocupación</th>
+                  <th style="width:70px">Acción</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <button class="btn" type="button" id="agregarIntegrante">
+              <i class="fa-solid fa-plus"></i> Agregar integrante
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. INGRESOS Y SERVICIOS -->
+        <div class="step" data-step="3">
+          <h3><span><i class="fa-solid fa-coins"></i> Ingresos y servicios</span></h3>
+
+          <!-- Ingresos -->
+          <h3 style="margin-top:0;">
+            <span><i class="fa-solid fa-piggy-bank"></i> Ingresos familiares mensuales</span>
+          </h3>
+          <div class="grid-3">
+            <div class="field">
+              <label><i class="fa-solid fa-person"></i>Jefe de familia (MXN)</label>
+              <input type="number" min="0" step="1" id="ing_jefe" value="0">
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-person-dress"></i>Esposa (MXN)</label>
+              <input type="number" min="0" step="1" id="ing_esposa" value="0">
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-children"></i>Hijos (MXN)</label>
+              <input type="number" min="0" step="1" id="ing_hijos" value="0">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label><i class="fa-solid fa-plus"></i>Otros (MXN)</label>
+              <input type="number" min="0" step="1" id="ing_otros" value="0">
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-equals"></i>Total mensual (MXN)</label>
+              <input type="number" id="ing_total" readonly>
+            </div>
+          </div>
+          <p class="desc"><i class="fa-solid fa-circle-info"></i> El total de ingresos se utiliza en el cuadro de resultados y en el gráfico comparativo.</p>
+
+          <!-- Servicios -->
+          <div class="field">
+            <label><i class="fa-solid fa-plug"></i>Servicios con los que cuenta</label>
+            <div class="chips">
+              <label class="chip"><input type="checkbox" name="servicios" value="WC" /> WC</label>
+              <label class="chip"><input type="checkbox" name="servicios" value="Letrina" /> Letrina</label>
+              <label class="chip"><input type="checkbox" name="servicios" value="Drenaje" /> Drenaje</label>
+              <label class="chip"><input type="checkbox" name="servicios" value="Alumbrado público" /> Alumbrado público</label>
+              <label class="chip"><input type="checkbox" name="servicios" value="Agua" /> Agua</label>
+              <label class="chip"><input type="checkbox" name="servicios" value="Electricidad" /> Electricidad</label>
+              <label class="chip"><input type="checkbox" name="servicios" value="Cable" /> Cable</label>
+              <label class="chip"><input type="checkbox" name="servicios" value="Teléfono" /> Teléfono</label>
+              <label class="chip"><input type="checkbox" name="servicios" value="Internet" /> Internet</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. VIVIENDA -->
+        <div class="step" data-step="4">
+          <h3><span><i class="fa-solid fa-house-chimney"></i> Vivienda</span></h3>
+
+          <div class="grid-3">
+            <div class="field">
+              <label><i class="fa-solid fa-house-chimney"></i>Tipo de vivienda</label>
+              <select name="tipo_vivienda">
+                <option value="">Seleccione</option>
+                <option>Propia</option>
+                <option>Rentada</option>
+                <option>Prestada</option>
+                <option>Irregular</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-users"></i>Dependientes económicos</label>
+              <input type="number" name="dependientes" min="0" value="0" />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-building"></i>Material de construcción (predominante)</label>
+              <select name="material">
+                <option value="">Seleccione</option>
+                <option>Block / Tabique</option>
+                <option>Adobe</option>
+                <option>Madera</option>
+                <option>Otro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div class="field">
+              <label><i class="fa-solid fa-building-columns"></i>Techo</label>
+              <select name="techo">
+                <option value="">Seleccione</option>
+                <option>Loza</option>
+                <option>Lámina</option>
+                <option>Cartón</option>
+                <option>Teja</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-border-all"></i>Piso</label>
+              <select name="piso">
+                <option value="">Seleccione</option>
+                <option>Cemento</option>
+                <option>Loseta / Mosaico</option>
+                <option>Tierra</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-clipboard-list"></i>Características</label>
+              <input type="text" name="caracteristicas" placeholder="N° de cuartos, hacinamiento, etc." />
+            </div>
+          </div>
+
+          <div class="field">
+            <label><i class="fa-solid fa-box-archive"></i>Propiedades diversas</label>
+            <textarea name="propiedades_diversas" placeholder="Vehículos, terrenos, herramientas, etc."></textarea>
+          </div>
+        </div>
+
+        <!-- 5. EGRESOS MENSUALES -->
+        <div class="step" data-step="5">
+          <h3><span><i class="fa-solid fa-wallet"></i> Egresos mensuales</span></h3>
+          <div class="grid-3">
+            <div class="field"><label><i class="fa-solid fa-basket-shopping"></i>Alimentación</label><input type="number" min="0" step="1" class="eg" value="0" id="eg_alim"></div>
+            <div class="field"><label><i class="fa-solid fa-graduation-cap"></i>Educación</label><input type="number" min="0" step="1" class="eg" value="0" id="eg_edu"></div>
+            <div class="field"><label><i class="fa-solid fa-house"></i>Habitación (renta/hipoteca)</label><input type="number" min="0" step="1" class="eg" value="0" id="eg_hab"></div>
+          </div>
+          <div class="grid-3">
+            <div class="field"><label><i class="fa-solid fa-stethoscope"></i>Servicio médico</label><input type="number" min="0" step="1" class="eg" value="0" id="eg_med"></div>
+            <div class="field"><label><i class="fa-regular fa-lightbulb"></i>Luz</label><input type="number" min="0" step="1" class="eg" value="0" id="eg_luz"></div>
+            <div class="field"><label><i class="fa-solid fa-faucet"></i>Agua</label><input type="number" min="0" step="1" class="eg" value="0" id="eg_agua"></div>
+          </div>
+          <div class="grid-3">
+            <div class="field"><label><i class="fa-solid fa-phone"></i>Teléfono</label><input type="number" min="0" step="1" class="eg" value="0" id="eg_tel"></div>
+            <div class="field"><label><i class="fa-solid fa-fire-burner"></i>Gas</label><input type="number" min="0" step="1" class="eg" value="0" id="eg_gas"></div>
+            <div class="field"><label><i class="fa-solid fa-bus"></i>Transporte</label><input type="number" min="0" step="1" class="eg" value="0" id="eg_trans"></div>
+          </div>
+          <div class="grid-3">
+            <div class="field"><label><i class="fa-solid fa-shirt"></i>Vestuario</label><input type="number" min="0" step="1" class="eg" value="0" id="eg_vest"></div>
+            <div class="field"><label><i class="fa-solid fa-masks-theater"></i>Diversión</label><input type="number" min="0" step="1" class="eg" value="0" id="eg_div"></div>
+            <div class="field"><label><i class="fa-solid fa-gas-pump"></i>Combustible</label><input type="number" min="0" step="1" class="eg" value="0" id="eg_comb"></div>
+          </div>
+          <div class="grid-2">
+            <div class="field"><label><i class="fa-solid fa-plus"></i>Otros</label><input type="number" min="0" step="1" class="eg" value="0" id="eg_otros"></div>
+            <div class="field"><label><i class="fa-solid fa-equals"></i>Total mensual (MXN)</label><input type="number" id="eg_total" readonly></div>
+          </div>
+        </div>
+
+        <!-- 6. ALIMENTACIÓN -->
+        <div class="step" data-step="6">
+          <h3><span><i class="fa-solid fa-bowl-food"></i> Alimentación</span></h3>
+          <div class="field">
+            <label><i class="fa-solid fa-utensils"></i>¿Qué comidas realiza al día?</label>
+            <div class="chips">
+              <label class="chip"><input type="checkbox" name="comidas" value="Desayuno" /> Desayuno</label>
+              <label class="chip"><input type="checkbox" name="comidas" value="Comida" /> Comida</label>
+              <label class="chip"><input type="checkbox" name="comidas" value="Cena" /> Cena</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label><i class="fa-solid fa-bowl-food"></i>¿Con qué frecuencia consume estos alimentos?</label>
+            <table>
+              <thead><tr><th>Alimento</th><th>Frecuencia</th></tr></thead>
+              <tbody id="freqBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 7. OPINIÓN Y FIRMAS -->
+        <div class="step" data-step="7">
+          <h3><span><i class="fa-solid fa-file-signature"></i> Opinión profesional y firmas</span></h3>
+
+          <div class="field">
+            <label><i class="fa-solid fa-comment-dots"></i>Opinión de Trabajo Social</label>
+            <textarea name="opinion_ts"></textarea>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label><i class="fa-solid fa-hand-holding-heart"></i>Plan social</label>
+              <textarea name="plan_social"></textarea>
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-gifts"></i>Apoyo que recibe</label>
+              <textarea name="apoyo_recibe"></textarea>
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div class="field">
+              <label><i class="fa-solid fa-user-tie"></i>Nombre y firma de T.S.</label>
+              <input type="text" name="firma_ts" placeholder="Nombre del Trabajador Social" />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-stamp"></i>Sello</label>
+              <input type="text" name="sello" />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-user-pen"></i>Nombre y firma del entrevistado</label>
+              <input type="text" name="firma_entrevistado" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Controles -->
+        <div class="acciones">
+          <button type="button" class="btn" id="prev">
+            <i class="fa-solid fa-arrow-left"></i> Anterior
+          </button>
+          <button type="button" class="btn primary" id="next">
+            Siguiente <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <button type="submit" class="btn gold" id="submit" style="display:none;">
+            <i class="fa-solid fa-paper-plane"></i> Enviar / Guardar JSON
+          </button>
+          <button type="button" class="btn" id="btnPrint" style="display:none;">
+            <i class="fa-solid fa-print"></i> Imprimir formato
+          </button>
+          <button type="button" class="btn" id="btnDownload" style="display:none;">
+            <i class="fa-solid fa-file-arrow-down"></i> Descargar JSON
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="card" id="graficos">
+        <h3>
+          <span><i class="fa-solid fa-chart-column"></i> Indicadores</span>
+          <span class="tag">Demo</span>
+        </h3>
+        <canvas id="chartIE"></canvas>
+        <p class="desc"><i class="fa-solid fa-circle-info"></i> Se compara el total de ingresos vs egresos mensuales.</p>
+      </div>
+
+      <div class="card" id="mapas">
+        <h3>
+          <span><i class="fa-solid fa-location-dot"></i> Mapa de localización</span>
+        </h3>
+        <div id="map"></div>
+        <p class="desc">
+          <i class="fa-solid fa-circle-info"></i> Usa el domicilio del beneficiario para ubicar el marcador en el mapa.
+        </p>
+      </div>
+
+      <div class="card" id="resultados">
+        <h3>
+          <span><i class="fa-solid fa-gauge-high"></i> Resumen socioeconómico</span>
+        </h3>
+        <ul class="resumen">
+          <li><span>Ingresos mensuales</span><strong id="r_ingresos">$0</strong></li>
+          <li><span>Egresos mensuales</span><strong id="r_egresos">$0</strong></li>
+          <li><span>Balance</span><strong id="r_balance">$0</strong></li>
+          <li><span>Dependientes económicos</span><strong id="r_dependientes">0</strong></li>
+          <li><span>Clasificación</span><strong id="r_clasificacion">Sin asignar</strong></li>
+        </ul>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    /* -------- Navegación de pasos -------- */
+    const steps = Array.from(document.querySelectorAll('.step'));
+    const pills = Array.from(document.querySelectorAll('.pill'));
+    const bar = document.getElementById('bar');
+    const btnPrev = document.getElementById('prev');
+    const btnNext = document.getElementById('next');
+    const btnSubmit = document.getElementById('submit');
+    const btnPrint = document.getElementById('btnPrint');
+    const btnDownload = document.getElementById('btnDownload');
+    let current = 1;
+
+    function renderSteps(){
+      steps.forEach((step,i)=>{
+        step.classList.toggle('activo', i+1===current);
+      });
+      pills.forEach((p,i)=>{
+        p.classList.toggle('activa', i+1===current);
+      });
+
+      const pct = (current-1)/(steps.length-1)*100;
+      bar.style.width = pct+'%';
+
+      btnPrev.style.visibility = current===1 ? 'hidden':'visible';
+      btnNext.style.display = current===steps.length ? 'none':'inline-flex';
+      btnSubmit.style.display = current===steps.length ? 'inline-flex':'none';
+      btnPrint.style.display = current===steps.length ? 'inline-flex':'none';
+      btnDownload.style.display = current===steps.length ? 'inline-flex':'none';
+    }
+    btnPrev.onclick = ()=>{ if(current>1){ current--; renderSteps(); } };
+    btnNext.onclick = ()=>{ if(current<steps.length){ current++; renderSteps(); } };
+    pills.forEach((pill,idx)=>{
+      pill.addEventListener('click',()=>{ current = idx+1; renderSteps(); });
+    });
+    renderSteps();
+
+    /* -------- Edad automática -------- */
+    const fnac = document.getElementById('fnac');
+    const edad = document.getElementById('edad');
+    fnac && fnac.addEventListener('change', ()=>{
+      const d = new Date(fnac.value);
+      if(!isNaN(d)){
+        const hoy = new Date();
+        let e = hoy.getFullYear()-d.getFullYear();
+        const m = hoy.getMonth()-d.getMonth();
+        if(m<0 || (m===0 && hoy.getDate()<d.getDate())) e--;
+        edad.value = Math.max(0,e);
+      }
+    });
+
+    /* -------- Tabla Estructura familiar -------- */
+    const tbodyFam = document.querySelector('#tablaFamilia tbody');
+    const btnAddFam = document.getElementById('agregarIntegrante');
+    function filaFamilia(){
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="text" placeholder="Apellidos y nombre(s)"></td>
+        <td><input type="number" min="0" style="width:100px"></td>
+        <td><input type="text" placeholder="Parentesco"></td>
+        <td><input type="text" placeholder="Escolaridad"></td>
+        <td><input type="text" placeholder="Ocupación"></td>
+        <td style="text-align:center">
+          <button type="button" class="btn" onclick="this.closest('tr').remove()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </td>
+      `;
+      return tr;
+    }
+    if(tbodyFam && btnAddFam){
+      tbodyFam.appendChild(filaFamilia());
+      btnAddFam.addEventListener('click',()=>tbodyFam.appendChild(filaFamilia()));
+    }
+
+    /* -------- Frecuencia de alimentos -------- */
+    const freqBody = document.getElementById('freqBody');
+    if(freqBody){
+      const alimentos = ['Verduras','Frutas','Carnes','Leguminosas','Lácteos','Refrescos','Comida rápida'];
+      const opciones = ['Diario','Varias veces por semana','1 vez por semana','Quincenal','Rara vez'];
+      alimentos.forEach((ali,idx)=>{
+        const tr = document.createElement('tr');
+        const name = `freq_${idx}`;
+        tr.innerHTML = `
+          <td>${ali}</td>
+          <td>
+            <select name="${name}">
+              ${opciones.map(o=>`<option value="${o}">${o}</option>`).join('')}
+            </select>
+          </td>
+        `;
+        freqBody.appendChild(tr);
+      });
+    }
+
+    /* -------- Ingresos y egresos -------- */
+    const ingIds = ['ing_jefe','ing_esposa','ing_hijos','ing_otros'];
+    const ingInputs = ingIds.map(id=>document.getElementById(id));
+    const ingTotalInput = document.getElementById('ing_total');
+
+    function totalIngresos(){
+      return ingInputs.reduce((sum,input)=> sum + Number(input?.value || 0), 0);
+    }
+    function updateIngresos(){
+      const t = totalIngresos();
+      if(ingTotalInput) ingTotalInput.value = t;
+      updateChart();
+      updatePanel();
+    }
+    ingInputs.forEach(i=> i && i.addEventListener('input', updateIngresos));
+
+    const egInputs = Array.from(document.querySelectorAll('.eg'));
+    const egTotalInput = document.getElementById('eg_total');
+
+    function totalEgresos(){
+      return egInputs.reduce((sum,input)=> sum + Number(input.value || 0), 0);
+    }
+    function updateEgresos(){
+      const t = totalEgresos();
+      if(egTotalInput) egTotalInput.value = t;
+      updateChart();
+      updatePanel();
+    }
+    egInputs.forEach(i=> i.addEventListener('input', updateEgresos));
+
+    /* -------- Gráfico ingresos vs egresos -------- */
+    const ctx = document.getElementById('chartIE')?.getContext('2d');
+    let chartIE = null;
+    if(ctx){
+      chartIE = new Chart(ctx,{
+        type:'bar',
+        data:{
+          labels:['Ingresos','Egresos'],
+          datasets:[{
+            label:'Monto (MXN)',
+            data:[0,0],
+            borderWidth:1
+          }]
+        },
+        options:{
+          responsive:true,
+          plugins:{ legend:{display:false} },
+          scales:{
+            x:{ grid:{display:false} },
+            y:{ beginAtZero:true }
+          }
+        }
+      });
+    }
+    function updateChart(){
+      if(!chartIE) return;
+      chartIE.data.datasets[0].data = [ totalIngresos(), totalEgresos() ];
+      chartIE.update();
+    }
+
+    /* -------- Panel de resultados -------- */
+    const rIng = document.getElementById('r_ingresos');
+    const rEg = document.getElementById('r_egresos');
+    const rBal = document.getElementById('r_balance');
+    const rDep = document.getElementById('r_dependientes');
+    const rClas = document.getElementById('r_clasificacion');
+    const depInput = document.querySelector('[name="dependientes"]');
+
+    function formatMXN(v){
+      return v.toLocaleString('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0});
+    }
+
+    function updatePanel(){
+      const ing = totalIngresos();
+      const eg = totalEgresos();
+      const bal = ing - eg;
+      const dep = Number(depInput?.value || 0);
+
+      if(rIng) rIng.textContent = formatMXN(ing);
+      if(rEg) rEg.textContent = formatMXN(eg);
+      if(rBal) rBal.textContent = formatMXN(bal);
+      if(rDep) rDep.textContent = dep;
+
+      if(rClas){
+        let clas = 'Equilibrio';
+        if(ing===0 && eg===0) clas = 'Sin datos';
+        else if(ing===0 && eg>0) clas = 'Sin ingresos';
+        else if(bal<0) clas = 'Déficit económico';
+        else if(bal>0) clas = 'Superávit económico';
+        rClas.textContent = clas;
+      }
+    }
+    depInput && depInput.addEventListener('input', updatePanel);
+
+    updateIngresos();
+    updateEgresos();
+
+    /* -------- Mapa Leaflet y geocodificación -------- */
+    let map = null;
+    let marker = null;
+    const mapDiv = document.getElementById('map');
+    if(mapDiv){
+      map = L.map('map').setView([20.09,-98.71], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        maxZoom:19,
+        attribution:'© OpenStreetMap'
+      }).addTo(map);
+    }
+
+    const btnLocate1 = document.getElementById('btnLocate1');
+    if(btnLocate1 && map){
+      btnLocate1.addEventListener('click',()=>{
+        const dom = document.querySelector('[name="domicilio"]')?.value || '';
+        const col = document.querySelector('[name="colonia"]')?.value || '';
+        if(!dom && !col){
+          alert('Captura al menos el domicilio o la colonia para poder ubicar en el mapa.');
+          return;
+        }
+        const q = encodeURIComponent(`${dom} ${col} Mineral de la Reforma, Hidalgo, México`);
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1&addressdetails=1`,{
+          headers:{'Accept-Language':'es'}
+        })
+          .then(r=>r.json())
+          .then(data=>{
+            if(data && data.length){
+              const {lat,lon,display_name} = data[0];
+              if(marker) marker.remove();
+              marker = L.marker([+lat,+lon]).addTo(map);
+              map.setView([+lat,+lon], 17);
+              marker.bindPopup('<strong>Domicilio localizado</strong><br>'+display_name).openPopup();
+            }else{
+              alert('No se encontró el domicilio en el mapa.');
+            }
+          })
+          .catch(()=>{
+            alert('Hubo un problema al consultar el servicio de mapas.');
+          });
+      });
+    }
+
+    /* -------- Exportar datos a JSON -------- */
+    const form = document.getElementById('encuesta');
+
+    function exportData(){
+      const fd = new FormData(form);
+      const data = {};
+
+      fd.forEach((value,key)=>{
+        // manejar checkboxes repetidos
+        if(data[key] !== undefined){
+          if(!Array.isArray(data[key])) data[key] = [data[key]];
+          data[key].push(value);
+        }else{
+          data[key] = value;
+        }
+      });
+
+      const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'estudio_socioeconomico.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    form.addEventListener('submit',e=>{
+      e.preventDefault();
+      exportData();
+      alert('Se descargó el archivo JSON con la información capturada.');
+    });
+    btnDownload && btnDownload.addEventListener('click',exportData);
+
+    /* -------- Imprimir -------- */
+    btnPrint && btnPrint.addEventListener('click',()=>window.print());
+  </script>
+
+</body>
+</html>
